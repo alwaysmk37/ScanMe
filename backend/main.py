@@ -23,23 +23,23 @@ app = FastAPI(
     description="Backend service for scanning URLs using VirusTotal API.",
 )
 
-origins = [
-    "http://localhost:5173",  # Vite local frontend
-    "https://scan-me-steel.vercel.app/"  # deployed frontend
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # --- Request Model ---
 class URLScanRequest(BaseModel):
     url: str
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the URL Scanner API"}
 
 # --- Main API Endpoint ---
 @app.post("/scan-url")
