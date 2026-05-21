@@ -23,10 +23,14 @@ app = FastAPI(
     description="Backend service for scanning URLs using VirusTotal API.",
 )
 
-# --- CORS Configuration ---
+origins = [
+    "http://localhost:5173",  # Vite local frontend
+    "https://scan-me-steel.vercel.app/"  # deployed frontend
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 🔒 Consider restricting for production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
