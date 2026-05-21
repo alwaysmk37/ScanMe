@@ -1,8 +1,8 @@
 // api.js
-
 // Define the base URL for the FastAPI backend as a constant.
 // IMPORTANT: Adjust this URL if your FastAPI server runs on a different address/port.
-const BACKEND_BASE_URL = process.env.BACKEND_BASE_URL || "http://localhost:8000"; // Default to localhost for development
+// Default to localhost for development
+const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:8000";
 
 /**
  * Sends a URL to the FastAPI backend for VirusTotal scanning.
