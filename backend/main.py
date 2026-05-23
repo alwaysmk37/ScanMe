@@ -25,9 +25,9 @@ try:
     mongo_client.server_info()
     db = mongo_client["Scanme"]
     scans_col = db["scans"]
-    print("✅ Successfully connected to MongoDB")
+    print("[OK] Successfully connected to MongoDB")
 except Exception as e:
-    print(f"⚠️  MongoDB Connection failed: {e}. Logging will be mocked in-memory.")
+    print(f"[WARN] MongoDB Connection failed: {e}. Logging will be mocked in-memory.")
     scans_col = None
 
 # --- In-memory fallback if MongoDB is not reachable ---
@@ -48,7 +48,7 @@ def save_scan_log(scan_type: str, query: str, results: Dict[str, Any], location:
             if "_id" in log_entry:
                 log_entry["_id"] = str(log_entry["_id"])
         except Exception as e:
-            print(f"❌ Failed to write log to MongoDB: {e}")
+            print(f"[ERROR] Failed to write log to MongoDB: {e}")
             fallback_scans.append(log_entry)
     else:
         fallback_scans.append(log_entry)
@@ -467,7 +467,7 @@ async def cve_lookup(
             return {"type": "list", "data": results}
             
     except Exception as e:
-        print(f"⚠️  NVD API error: {e}. Falling back to CIRCL CVE lookup API / mock generator.")
+        print(f"[WARN] NVD API error: {e}. Falling back to CIRCL CVE lookup API / mock generator.")
         # Attempt CIRCL lookup first as primary fallback
         try:
             circl_url = f"https://cve.circl.lu/api/cve/{query.upper()}" if is_cve_id else f"https://cve.circl.lu/api/search/{query}"
@@ -498,7 +498,7 @@ async def cve_lookup(
                     save_scan_log("cve", query, {"count": len(results)}, location)
                     return {"type": "list", "data": results}
         except Exception as fallback_err:
-            print(f"⚠️  CIRCL API fallback failed: {fallback_err}. Generating mock results.")
+            print(f"[WARN] CIRCL API fallback failed: {fallback_err}. Generating mock results.")
             
         # Mock Generator Fallback
         if is_cve_id:
