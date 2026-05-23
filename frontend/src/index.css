@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* --- Cyber Grid Scrolling Background --- */
+.cyber-grid {
+  background-image: 
+    linear-gradient(to right, rgba(59, 130, 246, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grid-scroll 24s linear infinite;
+}
+
+@keyframes grid-scroll {
+  from { background-position: 0 0; }
+  to { background-position: 0 80px; }
+}
+
+/* --- Dynamic Laser Scanner Beam --- */
+.scan-laser {
+  position: relative;
+  overflow: hidden;
+}
+.scan-laser::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(59, 130, 246, 0) 0%,
+    rgba(59, 130, 246, 0.08) 50%,
+    rgba(59, 130, 246, 0) 100%
+  );
+  animation: scan-laser-move 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes scan-laser-move {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* --- Glassmorphic Neon Cards --- */
+.cyber-card {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cyber-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
+  background-color: rgba(15, 23, 42, 0.7);
+}
+
+/* --- Glowing Interactive Nav Buttons --- */
+.cyber-btn-active {
+  animation: border-glow-pulse 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes border-glow-pulse {
+  0% {
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.08);
+  }
+  100% {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.25);
+  }
+}
+
+/* --- Neon Pulse Dots --- */
+.cyber-pulse-dot {
+  position: relative;
+}
+.cyber-pulse-dot::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: inherit;
+  border-radius: 50%;
+  animation: dot-pulse 1.8s infinite ease-out;
+  opacity: 0.8;
+}
+
+@keyframes dot-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}

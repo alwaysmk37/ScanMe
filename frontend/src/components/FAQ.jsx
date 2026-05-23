@@ -1,37 +1,33 @@
 import React, { useState } from 'react';
+import { HelpCircle } from 'lucide-react';
 
-// A simple reusable Accordion Item component for FAQs
 const AccordionItem = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleAccordion = () => {
-    setIsOpen(!isOpen);
-  };
-
   return (
-    <div className="border-b border-gray-200 py-3">
+    <div className="border-b border-slate-800/80 py-4">
       <button
-        className="flex justify-between items-center w-full text-left font-semibold text-lg text-gray-800 focus:outline-none"
-        onClick={toggleAccordion}
+        className="flex justify-between items-center w-full text-left font-bold text-slate-200 hover:text-blue-400 focus:outline-none transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span>{title}</span>
         <svg
-          className={`w-6 h-6 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+          className={`w-5 h-5 text-slate-500 transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-blue-400' : 'rotate-0'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? 'max-h-screen opacity-100 mt-2' : 'max-h-0 opacity-0'
+          isOpen ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="py-2 text-gray-600">
+        <div className="text-slate-400 text-sm leading-relaxed">
           {children}
         </div>
       </div>
@@ -41,52 +37,26 @@ const AccordionItem = ({ title, children }) => {
 
 const FAQ = () => {
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto mb-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Frequently Asked Questions</h2>
-      <div className="space-y-4">
-        <AccordionItem title="What is Scan Me App?">
-          Scan Me App is a free online tool that allows you to scan URLs for potential malware, phishing,
-          and other online threats. It leverages the powerful VirusTotal API to provide comprehensive scan reports.
+    <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800 p-8 rounded-2xl max-w-4xl mx-auto shadow-2xl space-y-6">
+      <h2 className="text-3xl font-extrabold text-slate-100 flex items-center justify-center gap-2 mb-2">
+        <HelpCircle className="text-blue-500" />
+        Frequently Asked Questions
+      </h2>
+      <div className="divide-y divide-slate-800">
+        <AccordionItem title="What is the ScanMe suite?">
+          ScanMe is a comprehensive client-side security platform that performs instant threat intelligence lookups on URLs, files, vulnerabilities (CVEs), and email headers to safeguard your daily operations.
         </AccordionItem>
 
-        <AccordionItem title="How does Scan Me App work?">
-          When you enter a URL and click 'Scan URL', our backend sends that URL to the VirusTotal API.
-          VirusTotal then scans the URL using multiple antivirus engines and website scanners,
-          and sends the results back to our app for display.
+        <AccordionItem title="How does the file scan work?">
+          You can look up the threat level of any file using its SHA-256 hash, or upload the file directly. Our backend connects with VirusTotal's API to run the file across dozens of active antiviruses and returns their verdicts.
         </AccordionItem>
 
-        <AccordionItem title="Is Scan Me App free to use?">
-          Yes, Scan Me App is completely free to use. We aim to provide a simple and effective
-          tool for checking URL safety.
+        <AccordionItem title="What is email header analysis?">
+          By analyzing raw message headers, ScanMe checks if cryptographic certificates (DKIM, SPF, DMARC) pass alignment rules. It maps hops to visualize the exact route a mail took from the sender to your inbox.
         </AccordionItem>
 
-        <AccordionItem title="Do you store my scanned URLs?">
-          No, we do not store a history of the URLs you submit on our servers. The URLs are
-          sent directly to the VirusTotal API for analysis and are not retained by our application
-          after the scan results are displayed.
-        </AccordionItem>
-
-        <AccordionItem title="What is VirusTotal?">
-          VirusTotal is a free online service that analyzes suspicious files and URLs to detect
-          types of malware and other malicious content. It uses various antivirus engines and
-          website scanners to provide a comprehensive analysis.
-        </AccordionItem>
-
-        <AccordionItem title="What do the scan results mean?">
-          The scan results show you how many security vendors flagged the URL as malicious
-          ("Positives") out of the total number of scanners used. You can also see individual
-          scanner reports, indicating whether a specific engine detected an issue and what
-          the detected threat was.
-        </AccordionItem>
-
-        <AccordionItem title="Can I scan any URL?">
-          You can scan most public URLs. However, scanning private URLs or those requiring
-          authentication may not yield accurate results, as VirusTotal might not have access to them.
-        </AccordionItem>
-
-        <AccordionItem title="What should I do if a URL is flagged as malicious?">
-          If a URL is flagged as malicious, it's strongly advised not to visit it. Such URLs
-          can lead to malware infections, phishing attempts, or other cyber threats.
+        <AccordionItem title="Are queries saved in MongoDB?">
+          Yes. To keep a clear audit trail of past threats, each search category, status, execution timestamp, and user IP location is recorded inside your MongoDB instance.
         </AccordionItem>
       </div>
     </div>

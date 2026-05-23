@@ -1,91 +1,87 @@
 import React, { useState } from 'react';
-import { scanUrl } from '../api.js'; // Retaining .js extension
-import ScanDetailsPage from './ScanDetailsPage'; // Removed .jsx extension
+import { scanUrl } from '../api.js';
+import ScanDetailsPage from './ScanDetailsPage';
+import { Shield, Globe, Search, RefreshCw } from 'lucide-react';
 
-// UrlInputForm Component: Handles URL input and scan submission.
-const UrlInputForm = ({ onScanSubmit }) => {
+const UrlInputForm = ({ onScanSubmit, loading }) => {
   const [url, setUrl] = useState('');
-
-  const handleChange = (e) => {
-    setUrl(e.target.value);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (url.trim()) {
       onScanSubmit(url.trim());
-      setUrl('');
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto mb-8">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Scan a URL</h2>
+    <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800 p-8 rounded-2xl max-w-2xl mx-auto shadow-2xl space-y-6">
+      <div className="text-center space-y-1">
+        <h2 className="text-2xl font-black text-slate-100 flex items-center justify-center gap-2">
+          <Globe className="text-blue-500 animate-[spin_10s_linear_infinite]" size={28} />
+          Scan a URL
+        </h2>
+        <p className="text-slate-400 text-xs">Analyze URL safety index across multiple web threat indicators.</p>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="url"
           value={url}
-          onChange={handleChange}
-          placeholder="Enter URL to scan (e.g., https://example.com)"
-          className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-inter"
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Enter URL to scan (e.g. https://example.com)"
+          className="p-3 bg-slate-900/60 border border-slate-800 focus:border-blue-500 focus:outline-none rounded-lg text-slate-200 text-sm font-inter"
           required
         />
         <button
           type="submit"
-          className="bg-blue-600 text-white p-3 rounded-md font-bold hover:bg-blue-700 transition-colors duration-200 shadow-lg font-inter"
+          disabled={loading}
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold p-3 rounded-lg hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center justify-center gap-2 cursor-pointer text-sm"
         >
-          Scan URL
+          {loading ? <RefreshCw className="animate-spin" size={18} /> : <Search size={18} />}
+          {loading ? 'Analyzing Target URL...' : 'Inspect URL'}
         </button>
       </form>
     </div>
   );
 };
 
-// Scanner Component: Manages the URL scanning logic and state, and renders the input form or detailed results.
 const Scanner = () => {
   const [scanResults, setScanResults] = useState(null);
-  const [loading, setLoading] = useState(false); // State to indicate VirusTotal scan loading status.
-  const [showDetailsPage, setShowDetailsPage] = useState(false); // New state to control page view
+  const [loading, setLoading] = useState(false);
+  const [showDetailsPage, setShowDetailsPage] = useState(false);
 
-  // Function to perform the actual VirusTotal API call via the FastAPI backend.
   const handleScanSubmit = async (url) => {
     setLoading(true);
-    setScanResults(null); // Clear previous results immediately
-    setShowDetailsPage(true); // Switch to the details page immediately
+    setScanResults(null);
+    setShowDetailsPage(true);
 
     try {
       const data = await scanUrl(url);
       setScanResults(data);
     } catch (error) {
       console.error("Error scanning URL:", error);
-      // Even on error, show the details page with the error message
-      setScanResults({ url: url, error: error.message || "Failed to connect to scanner API. Please try again." });
+      setScanResults({ url: url, error: error.message || "Failed to analyze URL." });
     } finally {
-      setLoading(false); // End loading regardless of success or failure
+      setLoading(false);
     }
   };
 
-  // Function to reset to the new scan form
   const handleNewScan = () => {
     setScanResults(null);
     setLoading(false);
-    setShowDetailsPage(false); // Go back to the input form
+    setShowDetailsPage(false);
   };
 
   return (
     <>
       {showDetailsPage ? (
-        // Always render the ScanDetailsPage if showDetailsPage is true.
-        // The ScanDetailsPage component will handle showing its own loading state
-        // or the results/error based on the 'loading' and 'scanResults' props.
         <ScanDetailsPage
           scanResults={scanResults}
-          loading={loading} // Pass loading state to the details page
+          loading={loading}
           onNewScan={handleNewScan}
         />
       ) : (
-        // Render the input form if showDetailsPage is false.
-        <UrlInputForm onScanSubmit={handleScanSubmit} />
+        <UrlInputForm onScanSubmit={handleScanSubmit} loading={loading} />
       )}
     </>
   );
