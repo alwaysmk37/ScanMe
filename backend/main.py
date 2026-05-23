@@ -19,16 +19,23 @@ MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
 NVD_API_KEY = os.getenv("NVD_API_KEY")
 
 # --- Initialize MongoDB client ---
-try:
-    mongo_client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
-    # Check connection
-    mongo_client.server_info()
-    db = mongo_client["Scanme"]
-    scans_col = db["scans"]
-    print("[OK] Successfully connected to MongoDB")
-except Exception as e:
-    print(f"[WARN] MongoDB Connection failed: {e}. Logging will be mocked in-memory.")
-    scans_col = None
+_mongo_client = None
+_scans_col = None
+
+def get_scans_col():
+    global _mongo_client, _scans_col
+    if _scans_col is not None:
+        return _scans_col
+    try:
+        _mongo_client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+        _mongo_client.server_info()
+        db = _mongo_client["Scanme"]
+        _scans_col = db["scans"]
+        print("[OK] Successfully connected to MongoDB")
+    except Exception as e:
+        print(f"[WARN] MongoDB Connection failed: {e}. Logging will be mocked in-memory.")
+        _scans_col = None
+    return _scans_col
 
 # --- In-memory fallback if MongoDB is not reachable ---
 fallback_scans = []
@@ -41,9 +48,10 @@ def save_scan_log(scan_type: str, query: str, results: Dict[str, Any], location:
         "results": results,
         "location": location or {"status": "fail", "message": "Location not provided"}
     }
-    if scans_col is not None:
+    col = get_scans_col()
+    if col is not None:
         try:
-            scans_col.insert_one(log_entry)
+            col.insert_one(log_entry)
             # Remove MongoDB internal ObjectId for JSON serialization compatibility in-app
             if "_id" in log_entry:
                 log_entry["_id"] = str(log_entry["_id"])
@@ -88,7 +96,7 @@ async def root():
     return {
         "status": "online",
         "message": "ScanMe Security Core API is active",
-        "database_connected": scans_col is not None
+        "database_connected": get_scans_col() is not None
     }
 
 # --- 1. URL Scanning (VirusTotal v3) ---
@@ -672,16 +680,17 @@ async def analyze_email_headers(request_data: EmailHeaderRequest):
 # --- 5. Logs, Search History & Dashboard Metrics ---
 @app.get("/history")
 async def get_history(limit: int = 50):
-    if scans_col is not None:
+    col = get_scans_col()
+    if col is not None:
         try:
-            cursor = scans_col.find({}).sort("timestamp", -1).limit(limit)
+            cursor = col.find({}).sort("timestamp", -1).limit(limit)
             logs = []
             for doc in cursor:
                 doc["_id"] = str(doc["_id"])
                 logs.append(doc)
             return logs
         except Exception as e:
-            print(f"❌ Failed to fetch database history: {e}")
+            print(f"[ERROR] Failed to fetch database history: {e}")
             return fallback_scans[-limit:]
     else:
         return fallback_scans[-limit:]
@@ -690,14 +699,15 @@ async def get_history(limit: int = 50):
 async def get_dashboard_metrics():
     # Gather logs
     all_logs = []
-    if scans_col is not None:
+    col = get_scans_col()
+    if col is not None:
         try:
-            cursor = scans_col.find({}).sort("timestamp", -1).limit(200)
+            cursor = col.find({}).sort("timestamp", -1).limit(200)
             for doc in cursor:
                 doc["_id"] = str(doc["_id"])
                 all_logs.append(doc)
         except Exception as e:
-            print(f"❌ Metrics Mongo query error: {e}")
+            print(f"[ERROR] Metrics Mongo query error: {e}")
             all_logs = fallback_scans
     else:
         all_logs = fallback_scans
